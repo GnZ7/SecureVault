@@ -1,8 +1,10 @@
 ﻿@page "/login"
 @using System.Net
 @using System.Net.Http.Json
+@using SecureVault.Shared
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject TokenService TokenService
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -79,7 +81,9 @@
 
             if (response.IsSuccessStatusCode)
             {
-                // The browser will automatically handle the HttpOnly cookie.
+                var auth = await response.Content.ReadFromJsonAsync<AuthResponse>();
+                if (auth is not null)
+                    TokenService.SetExpiry(auth.ExpiresAt);
                 Navigation.NavigateTo("/", forceLoad: true);
             }
             else if (response.StatusCode == HttpStatusCode.Unauthorized)

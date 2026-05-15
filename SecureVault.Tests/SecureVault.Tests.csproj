@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SecureVault.Api\SecureVault.Api.csproj" />
+    <ProjectReference Include="..\SecureVault.Shared\SecureVault.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
