@@ -191,7 +191,7 @@ public static class InputValidator
 
         switch (endpoint)
         {
-            case "/api/auth/register":
+            case "/register":
                 if (newUserRole != nameof(UserRoles.User) && newUserRole != nameof(UserRoles.Guest))
                 {
                     errorMessage = $"Invalid role. Can only register as {nameof(UserRoles.User)} or {nameof(UserRoles.Guest)}.";
@@ -199,7 +199,7 @@ public static class InputValidator
                 }
                 break;
 
-            case "/api/auth/register-admin":
+            case "/register-admin":
                 if (newUserRole != nameof(UserRoles.Admin))
                 {
                     errorMessage = $"Invalid role. Can only register users as {nameof(UserRoles.Admin)}.";

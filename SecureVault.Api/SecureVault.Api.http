@@ -1,7 +1,9 @@
 ﻿@SecureVault.Api_HostAddress = https://localhost:7091
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlOTk2ZWYzOS0zMGRiLTQ5MTgtOGNmNy0zNDVjNDY3NTg0MGYiLCJ1bmlxdWVfbmFtZSI6InRlc3RVc2VyIiwianRpIjoiZjdhMDVmY2ItMWI2Ny00Y2RhLTg2MjAtOGFkZDE3MjZmNGYyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc3ODYwMTM4NSwiaXNzIjoiU2VjdXJlVmF1bHQuQXBpIiwiYXVkIjoiU2VjdXJlVmF1bHQuQXBpQXVkaWVuY2UifQ.kInXFfNp2Tqb70KW04wbeBDlU5l2LNUg_M8Z_-zylmg
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMzU1ZGUwZC1mOGYyLTQ3YzQtYjY0Ny1kN2ZlMTEzMDkwNTciLCJ1bmlxdWVfbmFtZSI6InN1cGVyYWRtaW4iLCJqdGkiOiIwNzg1YTUxZS04YzhkLTQ5ZGUtOWI0NC1jMzZiNTJlNDAwOWUiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJTdXBlckFkbWluIiwiZXhwIjoxNzc4ODYwOTcxLCJpc3MiOiJTZWN1cmVWYXVsdC5BcGkiLCJhdWQiOiJTZWN1cmVWYXVsdC5BcGlBdWRpZW5jZSJ9.tmp-OQdA28kTfIu1Yka4DStbtMvHoz_hHBhBZOsYLg8
 @refreshToken = b2b3d166-7e9a-4540-98f7-250e71026a8e
 
+
+### Register an user without role, should fail.
 POST {{SecureVault.Api_HostAddress}}/register
 Content-Type: application/json
 
@@ -10,8 +12,41 @@ Content-Type: application/json
   "password": "testGuest@1234"  
 }
 
-### Register an admin user. Requieres SuperAdmin Role.
 
+### Register an user with User role
+### Should pass, unless the username is taken.
+POST {{SecureVault.Api_HostAddress}}/register
+Content-Type: application/json
+
+{
+  "userName": "testUser",
+  "password": "testUser@1234",
+  "role": "User"
+}
+
+### Test new User user created.
+### Should pass if the above POST request passed.
+
+POST {{SecureVault.Api_HostAddress}}/login
+Content-Type: application/json
+
+{
+  "userName": "testUser",
+  "password": "testUser@1234"
+}
+
+### Login as SuperAdmin and generate jwt
+POST {{SecureVault.Api_HostAddress}}/login
+Content-Type: application/json
+
+{
+  "userName": "superadmin",
+  "password": "superAdmin123_!!"
+}
+
+
+### Register an admin user.
+### Should pass if there's an user with SuperAdmin Role logged in and the username is not taken.
 POST {{SecureVault.Api_HostAddress}}/register-admin
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -22,29 +57,9 @@ Authorization: Bearer {{accessToken}}
   "role": "Admin"
 }
 
-###
 
-POST {{SecureVault.Api_HostAddress}}/register
-Content-Type: application/json
-
-{
-  "userName": "testUser",
-  "password": "testUser@1234",
-  "role": "User"
-}
-
-###
-
-POST {{SecureVault.Api_HostAddress}}/login
-Content-Type: application/json
-
-{
-  "userName": "superadmin",
-  "password": "superAdmin123_!!"
-}
-
-###
-
+### Test new Admin user created.
+### Should pass if the above POST request passed.
 POST {{SecureVault.Api_HostAddress}}/login
 Content-Type: application/json
 
@@ -53,15 +68,16 @@ Content-Type: application/json
   "password": "testAdmin@1234"
 }
 
-###
 
+###
 POST {{SecureVault.Api_HostAddress}}/login
 Content-Type: application/json
 
 {
-  "userName": "testUser",
-  "password": "testUser@1234"
+  "userName": "newAdmin",
+  "password": "testAdmin@1234"
 }
+
 
 ###
 
@@ -92,3 +108,11 @@ Content-Type: application/json
 {
   "RefreshToken": "{{refreshToken}}"
 }
+
+
+###
+GET {{SecureVault.Api_HostAddress}}/userinfo
+Authorization: Bearer {{accessToken}}
+
+
+###

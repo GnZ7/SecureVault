@@ -3,6 +3,7 @@ using SecureVault.Api.Auth.Jwt;
 using SecureVault.Api.Validators;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace SecureVault.Api.Auth;
 
@@ -76,7 +77,7 @@ public class AuthEndpoints
         })
         .RequireAuthorization("SuperAdminPolicy");
 
-        app.MapPost("/login", async ([FromBody] AuthRequest req, UserManager<ApplicationUser> userManager, JwtTokenService jwtService, ApplicationDbContext db, JwtSettings jwtSettings) =>
+        app.MapPost("/login", async ([FromBody] AuthRequest req, UserManager<ApplicationUser> userManager, JwtTokenService jwtService, ApplicationDbContext db, JwtSettings jwtSettings, HttpContext httpContext) =>
         {            
             if (!InputValidator.ValidateUsernameAndPassword(req.UserName, req.Password, out var validationError))
             {
@@ -91,12 +92,33 @@ public class AuthEndpoints
             var expires = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiresMinutes);
             db.RefreshTokens.Add(new RefreshToken(refreshToken, user.Id, expires, DateTime.UtcNow));
             await db.SaveChangesAsync();
+
+            httpContext.Response.Cookies.Append("accessToken", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = expires
+            });
+
+            httpContext.Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = expires
+            });
+
             return Results.Ok(new AuthResponse(accessToken, refreshToken, expires));
         });
 
-        app.MapPost("/refresh", async ([FromBody] RefreshRequest req, ApplicationDbContext db, UserManager<ApplicationUser> userManager, JwtTokenService jwtService, JwtSettings jwtSettings) =>
+        app.MapPost("/refresh", async ([FromBody] RefreshRequest req, ApplicationDbContext db, UserManager<ApplicationUser> userManager, JwtTokenService jwtService, JwtSettings jwtSettings, HttpContext httpContext) =>
         {
-            var token = await db.RefreshTokens.FindAsync(req.RefreshToken);
+            var refreshTokenValue = req.RefreshToken ?? httpContext.Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshTokenValue))
+                return Results.Unauthorized();
+
+            var token = await db.RefreshTokens.FindAsync(refreshTokenValue);
             if (token is null || !token.IsActive)
                 return Results.Unauthorized();
             var user = await userManager.FindByIdAsync(token.UserId);
@@ -110,8 +132,41 @@ public class AuthEndpoints
             var expires = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiresMinutes);
             db.RefreshTokens.Add(new RefreshToken(newRefreshToken, user.Id, expires, DateTime.UtcNow));
             await db.SaveChangesAsync();
+
+            httpContext.Response.Cookies.Append("accessToken", newAccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = expires
+            });
+
+            httpContext.Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = expires
+            });
+
             return Results.Ok(new AuthResponse(newAccessToken, newRefreshToken, expires));
         });
+
+        app.MapPost("/logout", (HttpContext httpContext) =>
+        {
+            httpContext.Response.Cookies.Delete("accessToken");
+            httpContext.Response.Cookies.Delete("refreshToken");
+            return Results.Ok();
+        });
+
+        app.MapGet("/userinfo", (ClaimsPrincipal user) =>
+        {
+            if (user.Identity?.IsAuthenticated != true)
+                return Results.Unauthorized();
+
+            var claims = user.Claims.Select(c => new { c.Type, c.Value });
+            return Results.Ok(new { user.Identity.Name, Claims = claims });
+        }).RequireAuthorization();
 
         app.MapGet("/protected", () => "You are authenticated!").RequireAuthorization();
 

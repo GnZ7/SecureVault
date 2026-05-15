@@ -1,114 +1,199 @@
 ﻿@page "/register"
 @using System.Net
 @using System.Net.Http.Json
+@using System.Text.Json
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Register</h3>
-                </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            @errorMessage
-                            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
-                        </div>
-                    }
+@if (!isInitialized)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else
+{
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Register</h3>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(successMessage))
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                @successMessage
+                                <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+                            </div>
+                        }
 
-                    @if (isLoading)
-                    {
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    }
-                    else
-                    {
-                        <EditForm Model="registerModel" OnValidSubmit="HandleRegister">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary class="alert alert-danger" />
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                @errorMessage
+                                <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                            </div>
+                        }
 
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <InputText id="username" class="form-control" @bind-Value="registerModel.UserName" placeholder="Enter username" />
-                                <ValidationMessage For="() => registerModel.UserName" class="text-danger small" />
+                        @if (isLoading)
+                        {
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        }
+                        else if (isSuperAdmin)
+                        {
+                            @* SuperAdmin: register a new Admin *@
+                            <h5 class="mb-3">Register a new Admin</h5>
+                            <EditForm Model="registerModel" OnValidSubmit="HandleRegisterAdmin">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary class="alert alert-danger" />
+
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <InputText id="username" class="form-control" @bind-Value="registerModel.UserName" placeholder="Enter username" />
+                                    <ValidationMessage For="() => registerModel.UserName" class="text-danger small" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" placeholder="Enter password" />
+                                    <ValidationMessage For="() => registerModel.Password" class="text-danger small" />
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">Register Admin</button>
+                            </EditForm>
+                        }
+                        else
+                        {
+                            @* Unauthenticated: register as User or Guest *@
+                            <EditForm Model="registerModel" OnValidSubmit="HandleRegister">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary class="alert alert-danger" />
+
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <InputText id="username" class="form-control" @bind-Value="registerModel.UserName" placeholder="Enter username" />
+                                    <ValidationMessage For="() => registerModel.UserName" class="text-danger small" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" placeholder="Enter password" />
+                                    <ValidationMessage For="() => registerModel.Password" class="text-danger small" />
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">Register as @UserRoles.User.ToString()</button>
+                            </EditForm>
+
+                            <div class="mt-3 text-center">
+                                <p style="cursor:pointer;" @onclick="HandleGuest">Join as @UserRoles.Guest.ToString()</p>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" placeholder="Enter password" />
-                                <ValidationMessage For="() => registerModel.Password" class="text-danger small" />
+                            <div class="mt-3 text-center">
+                                <p>Already have an account? <a href="/login">Login here</a></p>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="role" class="form-label">Role</label>
-                                @*<InputSelect id="role" class="form-select" @bind-Value="registerModel.Role">
-                                    <option value="">Select a role</option>
-                                    <option value="User">User</option>
-                                    <option value="Guest">Guest</option>
-                                </InputSelect>*@                                
-                                <ValidationMessage For="() => registerModel.Role" class="text-danger small" />
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100">Register</button>
-                        </EditForm>
-
-                        <div class="mt-3 text-center">
-                            <p @onclick="HandleGuest">Join as @UserRoles.Guest.ToString()</p>
-                        </div>
-
-                        <div class="mt-3 text-center">
-                            <p>Already have an account? <a href="/login">Login here</a></p>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+}
 
 @code {
     private RegisterModel registerModel = new();
     private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
     private bool isLoading = false;
-    private string userRole = UserRoles.Guest.ToString();
+    private bool isInitialized = false;
+    private bool isSuperAdmin = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        //HttpContext
-        
+        try
+        {
+            var response = await Http.GetAsync("/userinfo");
+            if (response.IsSuccessStatusCode)
+            {
+                var userInfo = await response.Content.ReadFromJsonAsync<UserInfo>();
+                if (userInfo?.Claims.Any(c => c.Value == "SuperAdmin") == true)
+                {
+                    isSuperAdmin = true;
+                }
+                else
+                {
+                    Navigation.NavigateTo("/", forceLoad: false);
+                    return;
+                }
+            }
+        }
+        catch
+        {
+            // Not authenticated or error
+        }
+
+        if (!isSuperAdmin)
+        {
+            registerModel.Role = UserRoles.User.ToString();
+        }
+
+        isInitialized = true;
+    }
+
+    private class UserInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public List<ClaimInfo> Claims { get; set; } = new();
+    }
+
+    private class ClaimInfo
+    {
+        public string Type { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
     }
 
     private void HandleGuest()
     {
-        registerModel.UserName = $"guest_{Guid.NewGuid().ToString().Substring(0, 8)}";
-        registerModel.Password = Guid.NewGuid().ToString().Substring(0, 12);
+        registerModel.UserName = $"guest_{Guid.NewGuid().ToString()[..8]}";
+        registerModel.Password = Guid.NewGuid().ToString()[..12];
         registerModel.Role = UserRoles.Guest.ToString();
-        HandleRegister();
+        _ = HandleRegister();
     }
 
     private async Task HandleRegister()
+    {
+        //registerModel.Role = UserRoles.User.ToString();
+        await PostRegisterAsync("/register");
+    }
+
+    private async Task HandleRegisterAdmin()
+    {
+        registerModel.Role = UserRoles.Admin.ToString();
+        await PostRegisterAsync("/register-admin");
+    }
+
+    private async Task PostRegisterAsync(string endpoint)
     {
         isLoading = true;
         errorMessage = string.Empty;
 
         try
         {
-            var registerRequest = new
+            var response = await Http.PostAsJsonAsync(endpoint, new
             {
                 UserName = registerModel.UserName,
                 Password = registerModel.Password,
                 Role = registerModel.Role
-            };
-
-            var response = await Http.PostAsJsonAsync("/register", registerRequest);
+            });
 
             if (response.IsSuccessStatusCode)
             {
+                successMessage = "Registration successful! Redirecting to login...";
+                StateHasChanged();
+                await Task.Delay(2000);
                 Navigation.NavigateTo("/login", forceLoad: false);
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest)
@@ -118,7 +203,7 @@
             }
             else
             {
-                errorMessage = $"An error occurred during registration. Please try again.";
+                errorMessage = "An error occurred during registration. Please try again.";
             }
         }
         catch (Exception ex)
@@ -129,5 +214,5 @@
         {
             isLoading = false;
         }
-    }    
+    }
 }

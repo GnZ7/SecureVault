@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Context/">
+    <File Path="RegisterUserFlow.md" />
+  </Folder>
   <Project Path="SecureVault.Api/SecureVault.Api.csproj" />
   <Project Path="SecureVault.Client/SecureVault.Client.csproj" />
   <Project Path="SecureVault.Shared/SecureVault.Shared.csproj" Id="0d10de50-1280-4790-a491-a71e108ead6a" />
