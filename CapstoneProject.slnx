@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SecureVault.Api/SecureVault.Api.csproj" />
+  <Project Path="SecureVault.Client/SecureVault.Client.csproj" />
+  <Project Path="SecureVault.Shared/SecureVault.Shared.csproj" Id="0d10de50-1280-4790-a491-a71e108ead6a" />
+  <Project Path="SecureVault.Tests/SecureVault.Tests.csproj" Id="9b14c617-040b-41dc-b8ed-0d3ce17511cc" />
+</Solution>
