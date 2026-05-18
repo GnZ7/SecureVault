@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @using System.Net.Http.Json
 @inject HttpClient Http
 @inject NavigationManager Navigation
@@ -20,15 +20,17 @@
                     else if (userInfo != null)
                     {
                         <h4>Hello, @userInfo.Name!</h4>
-                        <p>You are successfully authenticated using HttpOnly cookies.</p>
-                        <p>Your roles:</p>
-                        <ul>
+                        <p>You are successfully authenticated.</p>
+                        <div class="d-inline-flex">
+                            <p>Your role:</p>
                             @foreach (var claim in userInfo.Claims.Where(c => c.Type == "role" || c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"))
                             {
-                                <li>@claim.Value</li>
+                                <span class="badge text-bg-primary ms-2" style="max-height: fit-content">@claim.Value</span>
                             }
-                        </ul>
-                        <button class="btn btn-danger" @onclick="Logout">Logout</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-danger" @onclick="Logout">Logout</button>
+                        </div>
                     }
                     else
                     {
