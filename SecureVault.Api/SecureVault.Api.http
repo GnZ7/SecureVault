@@ -1,6 +1,48 @@
-﻿@SecureVault.Api_HostAddress = https://localhost:7091
+###########################################################################
+# SecureVault.Api.http — Manual API Testing File
+#
+# This file is used to manually test the SecureVault API endpoints directly
+# from your IDE (Rider, Visual Studio, or VS Code with the REST Client
+# extension). Each "###" separator defines an individual request that you
+# can execute independently by clicking the green ▶ play button next to it.
+#
+# HOW TO USE
+# ----------
+# 1. Start the API first:
+#        cd SecureVault.Api
+#        dotnet run --launch-profile https
+#
+# 2. Update the variables below before sending requests:
+#    • SecureVault.Api_HostAddress — Base URL of the running API.
+#      Change it only if you modified the port in launchSettings.json.
+#    • accessToken — A valid JWT. To obtain one, execute the
+#      "Login as SuperAdmin" request below, then copy the "accessToken"
+#      value from the response body and paste it here.
+#    • refreshToken — A valid refresh token. Copy the "refreshToken"
+#      value from any login response and paste it here.
+#
+#    Variables are referenced in requests as {{variableName}}.
+#
+# RECOMMENDED TESTING ORDER
+# -------------------------
+# 1. Login as SuperAdmin → copy accessToken & refreshToken into variables.
+# 2. Register a User (role "User") → verify with login.
+# 3. Register an Admin (requires SuperAdmin token) → verify with login.
+# 4. Test protected endpoints (/protected, /admin-role, /userinfo).
+# 5. Test token refresh (/refresh).
+# 6. Try registering without a role to confirm validation rejects it.
+#
+# NOTES
+# -----
+# • Tokens expire quickly (default: 3 min). Re-login and update
+#   the accessToken variable whenever you get a 401 Unauthorized response.
+# • Usernames are unique — if a registration returns a conflict error,
+#   choose a different username or delete the SQLite database and restart.
+###########################################################################
+
+@SecureVault.Api_HostAddress = https://localhost:7091
 @accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMzU1ZGUwZC1mOGYyLTQ3YzQtYjY0Ny1kN2ZlMTEzMDkwNTciLCJ1bmlxdWVfbmFtZSI6InN1cGVyYWRtaW4iLCJqdGkiOiIwNzg1YTUxZS04YzhkLTQ5ZGUtOWI0NC1jMzZiNTJlNDAwOWUiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJTdXBlckFkbWluIiwiZXhwIjoxNzc4ODYwOTcxLCJpc3MiOiJTZWN1cmVWYXVsdC5BcGkiLCJhdWQiOiJTZWN1cmVWYXVsdC5BcGlBdWRpZW5jZSJ9.tmp-OQdA28kTfIu1Yka4DStbtMvHoz_hHBhBZOsYLg8
-@refreshToken = b2b3d166-7e9a-4540-98f7-250e71026a8e
+@refreshToken = 48743d91-3262-4b62-a1bc-49a32560848f
 
 
 ### Register an user without role, should fail.
