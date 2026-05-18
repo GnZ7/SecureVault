@@ -119,7 +119,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 var userInfo = await response.Content.ReadFromJsonAsync<UserInfo>();
-                if (userInfo?.Claims.Any(c => c.Value == "SuperAdmin") == true)
+                if (userInfo?.Claims.Any(c => c.Value == UserRoles.SuperAdmin.ToString()) == true)
                 {
                     isSuperAdmin = true;
                 }
