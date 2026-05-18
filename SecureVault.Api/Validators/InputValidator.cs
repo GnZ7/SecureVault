@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net;
+using System.Text.RegularExpressions;
 
 namespace SecureVault.Api.Validators;
 
@@ -219,7 +220,13 @@ public static class InputValidator
     /// </summary>
     private static bool ContainsXssPatterns(string input)
     {
-        return XssPattern.IsMatch(input);
+        if (XssPattern.IsMatch(input))
+        {
+            return true;
+        }
+
+        var decodedInput = WebUtility.HtmlDecode(input);
+        return !string.Equals(decodedInput, input, StringComparison.Ordinal) && XssPattern.IsMatch(decodedInput);
     }
 
     /// <summary>
@@ -227,6 +234,12 @@ public static class InputValidator
     /// </summary>
     private static bool ContainsSqlInjectionPatterns(string input)
     {
-        return SqlInjectionPattern.IsMatch(input);
+        if (SqlInjectionPattern.IsMatch(input))
+        {
+            return true;
+        }
+
+        var decodedInput = WebUtility.HtmlDecode(input);
+        return !string.Equals(decodedInput, input, StringComparison.Ordinal) && SqlInjectionPattern.IsMatch(decodedInput);
     }
 }

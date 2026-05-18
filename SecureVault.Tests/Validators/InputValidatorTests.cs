@@ -15,6 +15,7 @@ public class InputValidatorTests
     [InlineData("admin; SELECT * FROM Users")]
     [InlineData("admin UNION SELECT password FROM users")]
     [InlineData("admin--")]
+    [InlineData("admin&#39; OR 1=1 --")]
     public void Username_WithSqlInjection_ShouldFail(string maliciousUsername)
     {
         // Act
@@ -57,6 +58,7 @@ public class InputValidatorTests
     [InlineData("<iframe src='javascript:alert(1)'></iframe>")]
     [InlineData("<div onclick='alert(1)'>click</div>")]
     [InlineData("javascript:alert(1)")]
+    [InlineData("&lt;script&gt;alert('xss')&lt;/script&gt;")]
     public void Username_WithXssPayload_ShouldFail(string maliciousUsername)
     {
         // Act
