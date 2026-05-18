@@ -97,7 +97,8 @@ public class AuthEndpoints
             var accessToken = await jwtService.GenerateTokenAsync(user);
             var refreshToken = Guid.NewGuid().ToString();
             var expires = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiresMinutes);
-            db.RefreshTokens.Add(new RefreshToken(refreshToken, user.Id, expires, DateTime.UtcNow));
+            var refreshExpires = DateTime.UtcNow.AddDays(7);
+            db.RefreshTokens.Add(new RefreshToken(refreshToken, user.Id, refreshExpires, DateTime.UtcNow));
             await db.SaveChangesAsync();
 
             httpContext.Response.Cookies.Append("accessToken", accessToken, new CookieOptions
@@ -113,7 +114,7 @@ public class AuthEndpoints
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Lax,
-                Expires = expires
+                Expires = refreshExpires
             });
 
             return Results.Ok(new AuthResponse(accessToken, refreshToken, expires));
@@ -121,7 +122,9 @@ public class AuthEndpoints
 
         app.MapPost("/refresh", async ([FromBody] RefreshRequest req, ApplicationDbContext db, UserManager<ApplicationUser> userManager, JwtTokenService jwtService, JwtSettings jwtSettings, HttpContext httpContext) =>
         {
-            var refreshTokenValue = req.RefreshToken ?? httpContext.Request.Cookies["refreshToken"];
+            var refreshTokenValue = string.IsNullOrWhiteSpace(req.RefreshToken)
+                ? httpContext.Request.Cookies["refreshToken"]
+                : req.RefreshToken;
             if (string.IsNullOrEmpty(refreshTokenValue))
                 return Results.Unauthorized();
 
@@ -137,7 +140,8 @@ public class AuthEndpoints
             var newAccessToken = await jwtService.GenerateTokenAsync(user);
             var newRefreshToken = Guid.NewGuid().ToString();
             var expires = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiresMinutes);
-            db.RefreshTokens.Add(new RefreshToken(newRefreshToken, user.Id, expires, DateTime.UtcNow));
+            var refreshExpires = DateTime.UtcNow.AddDays(7);
+            db.RefreshTokens.Add(new RefreshToken(newRefreshToken, user.Id, refreshExpires, DateTime.UtcNow));
             await db.SaveChangesAsync();
 
             httpContext.Response.Cookies.Append("accessToken", newAccessToken, new CookieOptions
@@ -153,7 +157,7 @@ public class AuthEndpoints
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Lax,
-                Expires = expires
+                Expires = refreshExpires
             });
 
             return Results.Ok(new AuthResponse(newAccessToken, newRefreshToken, expires));
