@@ -95,9 +95,9 @@
                 errorMessage = "An error occurred during login. Please try again.";
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            errorMessage = $"Error: {ex.Message}";
+            errorMessage = "A network error occurred. Please try again.";
         }
         finally
         {

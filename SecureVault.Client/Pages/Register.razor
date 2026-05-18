@@ -198,17 +198,16 @@ else
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Registration failed: {errorContent}";
+                errorMessage = "Registration failed. Please verify your input and try again.";
             }
             else
             {
                 errorMessage = "An error occurred during registration. Please try again.";
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            errorMessage = $"Error: {ex.Message}";
+            errorMessage = "A network error occurred. Please try again.";
         }
         finally
         {
