@@ -28,6 +28,12 @@
                                 <span class="badge text-bg-primary ms-2" style="max-height: fit-content">@claim.Value</span>
                             }
                         </div>
+
+                        if(isSuperAdmin)
+                        {
+                            <p>As a @UserRoles.SuperAdmin you can register new @UserRoles.Admin users <a href="/register">clicking here</a></p>
+                        }
+
                         <div>
                             <button class="btn btn-danger" @onclick="Logout">Logout</button>
                         </div>
@@ -49,6 +55,7 @@
 @code {
     private UserInfo? userInfo;
     private bool isLoading = true;
+    private bool isSuperAdmin = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,6 +65,12 @@
             if (response.IsSuccessStatusCode)
             {
                 userInfo = await response.Content.ReadFromJsonAsync<UserInfo>();
+
+                if (userInfo?.Claims.Any(c => c.Value == UserRoles.SuperAdmin.ToString()) == true)
+                {
+                    isSuperAdmin = true;
+                }
+
             }
         }
         catch
