@@ -77,16 +77,23 @@ public class AuthEndpoints
         })
         .RequireAuthorization("SuperAdminPolicy");
 
-        app.MapPost("/login", async ([FromBody] AuthRequest req, UserManager<ApplicationUser> userManager, JwtTokenService jwtService, ApplicationDbContext db, JwtSettings jwtSettings, HttpContext httpContext) =>
+        app.MapPost("/login", async ([FromBody] AuthRequest req, UserManager<ApplicationUser> userManager, JwtTokenService jwtService, ApplicationDbContext db, JwtSettings jwtSettings, HttpContext httpContext, ILogger<AuthEndpoints> logger) =>
         {            
             if (!InputValidator.ValidateUsernameAndPassword(req.UserName, req.Password, out var validationError))
             {
+                logger.LogWarning("Login rejected due to invalid input for user '{UserName}' from IP {IpAddress}.", req.UserName, httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
                 return Results.BadRequest(validationError);
             }
 
             var user = await userManager.FindByNameAsync(req.UserName);
             if (user is null || !await userManager.CheckPasswordAsync(user, req.Password))
+            {
+                logger.LogWarning("Login failed for user '{UserName}' from IP {IpAddress}.", req.UserName, httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
                 return Results.Unauthorized();
+            }
+
+            logger.LogInformation("Login succeeded for user '{UserName}' from IP {IpAddress}.", req.UserName, httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+
             var accessToken = await jwtService.GenerateTokenAsync(user);
             var refreshToken = Guid.NewGuid().ToString();
             var expires = DateTime.UtcNow.AddMinutes(jwtSettings.ExpiresMinutes);

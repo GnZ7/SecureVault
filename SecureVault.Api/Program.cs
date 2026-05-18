@@ -76,6 +76,22 @@ app.UseHttpsRedirection();
 app.UseCors("BlazorClient");
 
 app.UseAuthentication();
+
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("AccessEvents");
+        logger.LogInformation(
+            "Authenticated access by user '{UserName}' to '{Path}' resulted in status {StatusCode}.",
+            context.User.Identity?.Name ?? "unknown",
+            context.Request.Path,
+            context.Response.StatusCode);
+    }
+});
+
 app.UseAuthorization();
 
 AuthEndpoints.MapAuthEndpoints(app);
