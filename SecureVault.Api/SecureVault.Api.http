@@ -1,6 +1,6 @@
 ﻿@SecureVault.Api_HostAddress = https://localhost:7091
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNDNjMzUzNi0yOGUwLTQ5MzYtYTMwMS05N2QxYmEzYWJhYjAiLCJ1bmlxdWVfbmFtZSI6InRlc3RHdWVzdFVzZXIiLCJqdGkiOiJjODMxOTNiZC1hYTU0LTRmOWUtODlhZi05YzRhNzkwMjY3M2YiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJHdWVzdCIsImV4cCI6MTc3OTE5ODI1NywiaXNzIjoiU2VjdXJlVmF1bHQuQXBpIiwiYXVkIjoiU2VjdXJlVmF1bHQuQXBpQXVkaWVuY2UifQ.Dr8hmPBUYZY0WQNvq7WrmYSypu_cR7Zy1Vb_nrzFQco
-@refreshToken = 48743d91-3262-4b62-a1bc-49a32560848f
+@accessToken = ENTER_YOUR_ACCESS_TOKEN_HERE
+@refreshToken = ENTER_YOUR_REFRESH_TOKEN_HERE
 
 # ##########################################################################
 # SecureVault.Api.http — Manual API Testing File
