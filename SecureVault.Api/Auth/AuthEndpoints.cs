@@ -1,8 +1,9 @@
-﻿using SecureVault.Api;
-using SecureVault.Api.Auth.Jwt;
-using SecureVault.Api.Validators;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SecureVault.Api;
+using SecureVault.Api.Auth.Jwt;
+using SecureVault.Api.Validators;
 using System.Security.Claims;
 
 namespace SecureVault.Api.Auth;
@@ -181,6 +182,8 @@ public class AuthEndpoints
 
         app.MapGet("/protected", () => "You are authenticated!").RequireAuthorization();
 
-        app.MapGet("/admin-role", () => "You are an admin!").RequireAuthorization("AdminPolicy");
+        app.MapGet("/admin-role", () => "You have elevated rights!").RequireAuthorization("ElevatedRightsPolicy");
+
+        app.MapGet("/no-guests", () => "You are authenticated and you are not a guest!").RequireAuthorization(new AuthorizeAttribute { Roles = $"{nameof(UserRoles.SuperAdmin)}, {nameof(UserRoles.Admin)}, {nameof(UserRoles.User)}"});
     }
 }

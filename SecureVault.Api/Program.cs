@@ -53,8 +53,9 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperAdminPolicy", policy => policy.RequireRole(nameof(UserRoles.SuperAdmin)))
-    .AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"))
-    .AddPolicy("UserPolicy", policy => policy.RequireRole("User")); ;
+    .AddPolicy("AdminPolicy", policy => policy.RequireRole(nameof(UserRoles.Admin)))
+    .AddPolicy("UserPolicy", policy => policy.RequireRole(nameof(UserRoles.User)))
+    .AddPolicy("ElevatedRightsPolicy", policy => policy.RequireRole(nameof(UserRoles.Admin), nameof(UserRoles.SuperAdmin)));
 
 builder.Services.AddCors(options =>
 {

@@ -13,7 +13,7 @@
                 <div class="card-body">
                     @if (isLoading)
                     {
-                        <div class="spinner-border text-primary" role="status">
+                        <div class="spinner-border text-primary d-block mx-auto" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     }
@@ -31,7 +31,7 @@
 
                         if(isSuperAdmin)
                         {
-                            <p>As a @UserRoles.SuperAdmin you can register new @UserRoles.Admin users <a href="/register">clicking here</a></p>
+                            <p>As a @UserRoles.SuperAdmin you can register new @UserRoles.Admin users <a href="/register" class="fw-bold text-decoration-none">clicking here</a></p>
                         }
 
                         <div>
